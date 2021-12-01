@@ -23,3 +23,7 @@ module.exports.firebaseConfig = {
   appId: "1:110528791942:web:ca6f8cea2ea10c0db0d807",
   measurementId: "G-1PLDEK7JTN",
 };
+
+module.exports.socketConfig = {
+  cors: this.corsConfig,
+};
