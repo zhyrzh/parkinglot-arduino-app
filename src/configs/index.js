@@ -15,13 +15,13 @@ module.exports.parserConfig = {
 };
 
 module.exports.firebaseConfig = {
-  apiKey: "AIzaSyATytuhCrhw7Q1hP4VS-MJWvfUCf7nNkgk",
-  authDomain: "parkinglot-app-48e99.firebaseapp.com",
-  projectId: "parkinglot-app-48e99",
-  storageBucket: "parkinglot-app-48e99.appspot.com",
-  messagingSenderId: "110528791942",
-  appId: "1:110528791942:web:ca6f8cea2ea10c0db0d807",
-  measurementId: "G-1PLDEK7JTN",
+  apiKey: process.env.FIREBASE_APIKEY,
+  authDomain: process.env.FIREBASE_AUTHDOMAIN,
+  projectId: process.env.FIREBASE_PROJECTID,
+  storageBucket: process.env.FIREBASE_STORAGEBUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGINGSENDERID,
+  appId: process.env.FIREBASE_APPID,
+  measurementId: process.env.FIREBASE_MEASUREMENTID,
 };
 
 module.exports.socketConfig = {

@@ -4,6 +4,7 @@ const app = express();
 const httpServer = require("http").createServer(app);
 const { Server } = require("socket.io");
 const cors = require("cors");
+require("dotenv").config();
 
 const { corsConfig, socketConfig } = require("./configs"); // CONFIGS
 const parser = require("./arduino-comm"); // ARDUINO PARSER
