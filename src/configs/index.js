@@ -1,5 +1,7 @@
+const corsConfig = "http://localhost:8080"
+
 module.exports.corsConfig = {
-  origin: "http://localhost:8080",
+  origin: corsConfig,
 };
 
 module.exports.arduinoPortConfig = {
@@ -25,5 +27,5 @@ module.exports.firebaseConfig = {
 };
 
 module.exports.socketConfig = {
-  cors: this.corsConfig,
+  cors: corsConfig,
 };
