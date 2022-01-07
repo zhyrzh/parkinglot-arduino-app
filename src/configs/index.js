@@ -1,4 +1,4 @@
-const corsConfig = "http://localhost:8080"
+const corsConfig = "http://localhost:8080";
 
 module.exports.corsConfig = {
   origin: corsConfig,

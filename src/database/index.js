@@ -1,8 +1,8 @@
 const { initializeApp } = require("firebase/app");
-const { getFirestore, collection, addDoc } = require("firebase/firestore");
+const { getFirestore } = require("firebase/firestore");
 const { firebaseConfig } = require("../configs");
 
-const firebaseApp = initializeApp(firebaseConfig);
-const firestore = getFirestore(firebaseApp);
+initializeApp(firebaseConfig);
+const firestore = getFirestore();
 
 module.exports = firestore;
