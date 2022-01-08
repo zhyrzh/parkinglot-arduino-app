@@ -43,6 +43,6 @@ const modifierHelper = async (
     `Location/${locationIds[locationIdIndex]}/Slots/${slotIds[slotIdIndex]}`
   );
   const locationSlots = await updateDoc(locationRef, {
-    Status: slotStatus === "OCCUPIED",
+    Status: slotStatus !== "OCCUPIED",
   });
 };
