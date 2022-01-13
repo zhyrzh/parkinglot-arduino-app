@@ -28,7 +28,6 @@ const slotStatusModifier = async (slotNumber, slotStatus) => {
       indexOfSlotId = 1;
       break;
   }
-  console.log(indexOfSlotId);
   modifierHelper(indexOfLocationId, arrayOfSlotId, indexOfSlotId, slotStatus);
 };
 
