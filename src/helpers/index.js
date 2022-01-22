@@ -1,8 +1,22 @@
-const { doc, updateDoc } = require("firebase/firestore");
+const dayjs = require("dayjs");
+const {
+  doc,
+  updateDoc,
+  collection,
+  getDocs,
+  setDoc,
+  getDoc,
+  addDoc,
+  serverTimestamp,
+} = require("firebase/firestore");
 const firestore = require("../database");
-const locationIds = ["0V2XWFWlLqLsDzJLG6fw", "YjgQEuf5IYVRfZKLvbzb"];
-const location1slotIds = ["gaFG8hqEG1Dpl2uMx2GT", "MACBSmESFcXATw61wkxS"];
-const location2slotIds = ["tsXL2y9EDEh7ys4BFraa", "kYoyMywJs6WK6RbsiMZc"];
+const DATE_NOW = dayjs().format("MMM-DD-YYYY HH:mm");
+const slotIds = [
+  "aCYJF19T3YiT5XOE9uoc",
+  "bIoVueG93nTWIFhDx9gc",
+  "jS46q51Zy1irEGAs55k2",
+  "tJZ4lN5t27ZEqrIyVLvr",
+];
 
 module.exports.addParkingSession = async (data) => {
   const slotNumber = data.substring(0, 6);
@@ -15,33 +29,51 @@ module.exports.addParkingSession = async (data) => {
 };
 
 const slotStatusModifier = async (slotNumber, slotStatus) => {
-  const indexOfLocationId = slotNumber <= 2 ? 0 : 1;
-  const arrayOfSlotId = slotNumber <= 2 ? location1slotIds : location2slotIds;
-  let indexOfSlotId;
-  switch (slotNumber) {
-    case "3":
-    case "1":
-      indexOfSlotId = 0;
-      break;
-    case "4":
-    case "2":
-      indexOfSlotId = 1;
-      break;
-  }
-  modifierHelper(indexOfLocationId, arrayOfSlotId, indexOfSlotId, slotStatus);
+  const normalizedSlotNumber = +slotNumber;
+  const slotId = slotIds[normalizedSlotNumber - 1];
+
+  modifierHelper(slotId, slotStatus);
 };
 
-const modifierHelper = async (
-  locationIdIndex,
-  slotIds,
-  slotIdIndex,
-  slotStatus
-) => {
-  const locationRef = await doc(
-    firestore,
-    `Location/${locationIds[locationIdIndex]}/Slots/${slotIds[slotIdIndex]}`
-  );
-  const locationSlots = await updateDoc(locationRef, {
-    Status: slotStatus !== "OCCUPIED",
-  });
+const modifierHelper = async (slotId, slotStatus) => {
+  if (slotStatus === "OCCUPIED") {
+    occupiedHandler(slotStatus === "OCCUPIED", slotId);
+  }
+  if (slotStatus !== "OCCUPIED") {
+    occupiedHandler(slotStatus === "OCCUPIED", slotId);
+  }
 };
+
+async function occupiedHandler(isOccupied, slotId) {
+  const locationRef = doc(firestore, `Slots/${slotId}`);
+
+  if (!isOccupied) {
+    const transactionSessionIn = await getDoc(locationRef);
+    const toBeRecordedSessionIn = transactionSessionIn.data().sessionIn;
+    addTransaction(toBeRecordedSessionIn, slotId);
+  }
+  await updateDoc(locationRef, {
+    hasOccuringTransaction: isOccupied,
+    Status: isOccupied,
+    sessionIn: isOccupied ? generateDate() : null,
+  });
+}
+
+async function addTransaction(sessionIn, slotId) {
+  const dateOnly = generateDate(false);
+  const sessionOut = generateDate();
+  const transactionRef = doc(
+    firestore,
+    `Slots/${slotId}/Transactions/${dateOnly}--${sessionIn}-${sessionOut}`
+  );
+  await setDoc(transactionRef, {
+    sessionIn: sessionIn,
+    sessionOut: sessionOut,
+  });
+}
+
+function generateDate(timeOnly = true) {
+  const NOW = dayjs().format("MMM-DD-YYYY");
+  const TIME_ONLY = dayjs().format("HH:mm");
+  return timeOnly ? TIME_ONLY : NOW;
+}
