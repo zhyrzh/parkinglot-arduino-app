@@ -46,16 +46,16 @@ const modifierHelper = async (slotId, slotStatus) => {
 
 async function occupiedHandler(isOccupied, slotId) {
   const locationRef = doc(firestore, `Slots/${slotId}`);
-
-  if (!isOccupied) {
-    const transactionSessionIn = await getDoc(locationRef);
-    const toBeRecordedSessionIn = transactionSessionIn.data().sessionIn;
+  const transactionSessionIn = await getDoc(locationRef);
+  const toBeRecordedSessionIn = transactionSessionIn.data().sessionIn;
+  if (!isOccupied && toBeRecordedSessionIn) {
     addTransaction(toBeRecordedSessionIn, slotId);
   }
+  const sessionIn = generateDate(false) + "--" + generateDate();
   await updateDoc(locationRef, {
     hasOccuringTransaction: isOccupied,
     Status: isOccupied,
-    sessionIn: isOccupied ? generateDate() : null,
+    sessionIn: isOccupied ? sessionIn.toString() : null,
   });
 }
 
@@ -64,11 +64,15 @@ async function addTransaction(sessionIn, slotId) {
   const sessionOut = generateDate();
   const transactionRef = doc(
     firestore,
-    `Slots/${slotId}/Transactions/${dateOnly}--${sessionIn}-${sessionOut}`
+    `Slots/${slotId}/Transactions/${sessionIn}`
   );
   await setDoc(transactionRef, {
-    sessionIn: sessionIn,
+    sessionIn: sessionIn.slice(sessionIn.length - 5),
     sessionOut: sessionOut,
+    sessionCost: getTotalHours(
+      sessionIn.slice(sessionIn.length - 5),
+      sessionOut
+    ),
   });
 }
 
@@ -76,4 +80,13 @@ function generateDate(timeOnly = true) {
   const NOW = dayjs().format("MMM-DD-YYYY");
   const TIME_ONLY = dayjs().format("HH:mm");
   return timeOnly ? TIME_ONLY : NOW;
+}
+
+function getTotalHours(sessionIn, sessionOut) {
+  const ft = dayjs(`2000-01-01 ${sessionIn}`);
+  const tt = dayjs(`2000-01-01 ${sessionOut}`);
+  const mins = tt.diff(ft, "minutes", true);
+  const totalHours = mins / 60;
+  const totalMins = dayjs().minute(mins).$m;
+  return totalHours;
 }
